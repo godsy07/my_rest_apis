@@ -25,7 +25,7 @@ const verifyToken = (token) => {
 }
 
 const generateToken = (payload, remember_me) => {
-    const expireTime = remember_me ? process.env.MY_API_JWT_EXPIRE_DAYS : '1d';
+    const expireTime = remember_me ? `${process.env.MY_API_JWT_EXPIRE_DAYS}d` : '1d';
     
     return jwt.sign(payload, process.env.MY_API_JWT_SECRET_KEY, { expiresIn: expireTime });;
 }
