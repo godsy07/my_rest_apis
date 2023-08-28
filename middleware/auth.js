@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const verifyToken = (req, res, next) => {
+const authenticated = (req, res, next) => {
   
     let token = req.cookies && req.cookies.mi_api_token;
   
@@ -12,7 +12,7 @@ const verifyToken = (req, res, next) => {
         return res.status(403).json({ status: false ,message:"A token is required for authentication"});
     }
     try {
-        const decoded = jwt.verify(token, process.env.MY_API_JWT_SECRET_KEY);
+        const decoded = verifyToken(token);
         req.user = decoded;
     } catch (err) {
         return res.status(401).json({ status: false, message:"Invalid token, Please try logging in again"});
@@ -20,4 +20,18 @@ const verifyToken = (req, res, next) => {
     return next();
 };
 
-module.exports = { verifyToken };
+const verifyToken = (token) => {
+    return jwt.verify(token, process.env.MY_API_JWT_SECRET_KEY)
+}
+
+const generateToken = (payload, remember_me) => {
+    const expireTime = remember_me ? process.env.MY_API_JWT_EXPIRE_DAYS : '1d';
+    
+    return jwt.sign(payload, process.env.MY_API_JWT_SECRET_KEY, { expiresIn: expireTime });;
+}
+
+module.exports = {
+    authenticated,
+    verifyToken,
+    generateToken,
+};
