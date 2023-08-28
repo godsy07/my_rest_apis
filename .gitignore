@@ -1,0 +1,9 @@
+
+
+# NODE Files
+node_modules/
+dist/
+public/uploads/
+public/downloads/
+
+*.env
