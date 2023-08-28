@@ -10,6 +10,8 @@ dotenv.config({ path: "./.env" });
 
 const logger = require('./middleware/logger');
 
+const userRoutes = require("./versions/v1/routes/userRoutes");
+
 const app = express();
 
 let corsOptions = {
@@ -21,17 +23,17 @@ let corsOptions = {
     optionSuccessStatus: 200,
 };
 
-if (process.env.NODE_ENV === "developement") {
+if (process.env.NODE_ENV === "development") {
     app.use(logger);
 }
 
 app.use(cors(corsOptions));
+app.use(express.json());
 app.use(
     express.urlencoded({
         extended: true,
     })
 );
-app.use(express.json());
 app.use(cookieParser());
 app.use(express.static('public'));
 app.use(mongoSanitize({
@@ -40,6 +42,8 @@ app.use(mongoSanitize({
 
 // Connecting with DB
 mongoDBConnect();
+
+app.use("/my_apis/v1/user", userRoutes);
 
 app.get("/", async (req, res) => {
     res.status(200).json({ status: false, message: "Rooutes are working fine." });
