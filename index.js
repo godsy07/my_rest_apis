@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
 const cron = require('node-cron');
@@ -38,6 +39,13 @@ app.use(cookieParser());
 app.use(express.static('public'));
 app.use(mongoSanitize({
     replaceWith: '-'
+}));
+
+// Configure session
+app.use(session({
+    secret: process.env.MY_API_SESSION_SECRET,
+    resave: true,
+    saveUninitialized: false,
 }));
 
 // Connecting with DB
