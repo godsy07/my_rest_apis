@@ -42,10 +42,12 @@ app.use(mongoSanitize({
 }));
 
 // Configure session
+const sessionMaxAge = 1000 * 60 * 60 * 24 * Number(process.env.MY_API_JWT_EXPIRE_DAYS);
 app.use(session({
     secret: process.env.MY_API_SESSION_SECRET,
-    resave: true,
-    saveUninitialized: false,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { path: '/', httpOnly: true, secure: false, maxAge: sessionMaxAge },
 }));
 
 // Connecting with DB
