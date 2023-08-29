@@ -61,7 +61,7 @@ const createUser = async (req, res) => {
       .json({ status: true, user, message: "Created a new user." });
   } catch (e) {
     return res
-      .status(200)
+      .status(500)
       .json({ status: false, message: "Something went wrong in server" });
   }
 };
@@ -134,7 +134,7 @@ const signupUser = async (req, res) => {
       .json({ status: true, token, message: "Created a new user." });
   } catch (e) {
     return res
-      .status(200)
+      .status(500)
       .json({ status: false, message: "Something went wrong in server" });
   }
 };
@@ -160,7 +160,6 @@ const loginUser = async (req, res) => {
         .json({ status: false, message: error.details[0].message });
     }
 
-    const test = await UserModel.find();
     const user = await UserModel.findOne({ email: email });
     if (!user) {
       return res
@@ -190,9 +189,8 @@ const loginUser = async (req, res) => {
       .status(200)
       .json({ status: true, token, message: "User logged in" });
   } catch (e) {
-    console.log(e);
     return res
-      .status(200)
+      .status(500)
       .json({ status: false, message: "Something went wrong in server" });
   }
 };
