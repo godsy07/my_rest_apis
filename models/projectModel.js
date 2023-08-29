@@ -11,6 +11,10 @@ const ProjectSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    active: {
+      type: Boolean,
+      default: true,
+    },
     project_url: {
       type: Boolean,
       default: true,

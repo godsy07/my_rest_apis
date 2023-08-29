@@ -7,5 +7,7 @@ const router = express.Router();
 
 router.get('/get-all-projects', ProjectController.getAllProjects);
 router.get('/get-project/:project_id', ProjectController.getProjectDetails);
+router.post('/delete-project', authenticated, isAdmin, ProjectController.deleteProject);
+router.post('/update-project', authenticated, isAdmin, ProjectController.updateProjectDetails);
 
 module.exports = router;
