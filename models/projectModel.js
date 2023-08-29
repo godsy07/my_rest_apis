@@ -16,8 +16,10 @@ const ProjectSchema = new mongoose.Schema(
       default: true,
     },
     project_url: {
-      type: Boolean,
-      default: true,
+      type: String,
+    },
+    github_url: {
+      type: String,
     },
     tags: {
       type: [{ type: String}],

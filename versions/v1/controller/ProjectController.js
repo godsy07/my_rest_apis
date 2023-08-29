@@ -36,6 +36,24 @@ const getProjectDetails = async (req, res) => {
   }
 };
 
+const addProject = async (req, res) => {
+  try {
+    const { name, project_url, github_url, images, tags, description } = req.body;
+
+    // Validation to be added later
+
+    const project = await ProjectModel.create({ name, project_url, github_url, images, tags, description });
+
+    return res
+      .status(200)
+      .json({ status: true, project, message: "Fetched all projects." });
+  } catch (e) {
+    return res
+      .status(500)
+      .json({ status: false, message: "Something went wrong in server" });
+  }
+};
+
 const deleteProject = async (req, res) => {
   try {
     const { project_id } = req.body;
@@ -62,7 +80,7 @@ const deleteProject = async (req, res) => {
 
 const updateProjectDetails = async (req, res) => {
   try {
-    const { project_id, name, project_url, images, tags, description } = req.body;
+    const { project_id, name, project_url, github_url, images, tags, description } = req.body;
 
     // Validation to be added later
 
@@ -72,7 +90,7 @@ const updateProjectDetails = async (req, res) => {
       return res.status(404).json({ status: false, message: "Could'nt find the project." });
     }
 
-    project = await ProjectModel.updateOne({ _id: project_id },{ name, project_url, images, tags, description });
+    project = await ProjectModel.updateOne({ _id: project_id },{ name, project_url, github_url, images, tags, description });
 
     return res
       .status(200)
@@ -87,6 +105,7 @@ const updateProjectDetails = async (req, res) => {
 module.exports = {
   getAllProjects,
   getProjectDetails,
+  addProject,
   deleteProject,
   updateProjectDetails,
 };
