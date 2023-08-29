@@ -11,6 +11,7 @@ dotenv.config({ path: "./.env" });
 const logger = require('./middleware/logger');
 
 const userRoutes = require("./versions/v1/routes/userRoutes");
+const projectRoutes = require("./versions/v1/routes/projectRoutes");
 
 const app = express();
 
@@ -44,6 +45,7 @@ app.use(mongoSanitize({
 mongoDBConnect();
 
 app.use("/my_apis/v1/user", userRoutes);
+app.use("/my_apis/v1/project", projectRoutes);
 
 app.get("/", async (req, res) => {
     res.status(200).json({ status: false, message: "Rooutes are working fine." });
