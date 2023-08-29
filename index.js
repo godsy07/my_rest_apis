@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
 const cron = require('node-cron');
@@ -39,15 +38,6 @@ app.use(cookieParser());
 app.use(express.static('public'));
 app.use(mongoSanitize({
     replaceWith: '-'
-}));
-
-// Configure session
-const sessionMaxAge = 1000 * 60 * 60 * 24 * Number(process.env.MY_API_JWT_EXPIRE_DAYS);
-app.use(session({
-    secret: process.env.MY_API_SESSION_SECRET,
-    resave: false,
-    saveUninitialized: true,
-    cookie: { path: '/', httpOnly: true, secure: false, maxAge: sessionMaxAge },
 }));
 
 // Connecting with DB
