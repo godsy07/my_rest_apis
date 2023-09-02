@@ -8,7 +8,7 @@ const getAllProjects = async (req, res) => {
 
     return res
       .status(200)
-      .json({ status: true, projects, message: "Fetched all projects." });
+      .json({ status: true, data: projects, message: "Fetched all projects." });
   } catch (e) {
     return res
       .status(500)
@@ -23,7 +23,7 @@ const getProjectDetails = async (req, res) => {
     const project = await ProjectModel.findById(url_data.project_id);
 
     if (!project) {
-      return res.status(404).json({ status: false, message: "Could'nt find the project." });
+      return res.status(404).json({ status: false, data: project, message: "Could'nt find the project." });
     }
 
     return res

@@ -17,18 +17,17 @@ const app = express();
 
 let corsOptions = {
     origin: true,
-    methods: ["GET","PUT","POST","OPTIONS"],
-    allowedHeaders: ["Content-Type","Authorization"],
-    credentails: true,
-    preflightContinue: false,
+    methods: "GET,PUT,POST,OPTIONS",
+    credentials: true,
+    preflightContinue: true,
     optionSuccessStatus: 200,
 };
 
+app.use(cors(corsOptions));
 if (process.env.NODE_ENV === "development") {
     app.use(logger);
 }
 
-app.use(cors(corsOptions));
 app.use(express.json());
 app.use(
     express.urlencoded({
