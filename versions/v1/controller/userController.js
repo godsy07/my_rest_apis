@@ -178,7 +178,7 @@ const loginUser = async (req, res) => {
 
     const token_payload = {
       id: user._id,
-      name: user.name,
+      name: `${user.first_name} ${user.last_name}`,
       email: user.email,
       user_type: user.user_type,
       user_access: user.user_access,
@@ -195,8 +195,23 @@ const loginUser = async (req, res) => {
   }
 };
 
+const getAllUsers = async (req, res) => {
+  try {
+    const user_list = await UserModel.find();
+
+    return res
+      .status(200)
+      .json({ status: true, data: user_list, message: "Fetched users list." });
+  } catch (e) {
+    return res
+      .status(500)
+      .json({ status: false, data:[], message: "Something went wrong in server" });
+  }
+};
+
 module.exports = {
   createUser,
   signupUser,
   loginUser,
+  getAllUsers,
 };
