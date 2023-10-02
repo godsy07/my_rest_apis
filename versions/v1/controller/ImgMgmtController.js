@@ -153,7 +153,7 @@ const uploadAPublicImage = async (req, res) => {
       saved_by,
       title: image_title,
       tags: image_tags,
-      decription: image_description,
+      description: image_description,
     });
 
     return res
@@ -212,7 +212,7 @@ const uploadAPrivateImage = async (req, res) => {
       saved_by,
       title: image_title,
       tags: image_tags,
-      decription: image_description,
+      description: image_description,
     });
 
     return res

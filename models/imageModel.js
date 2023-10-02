@@ -24,7 +24,7 @@ const ImageSchema = new mongoose.Schema(
       type: [{ type: String}],
       default: ["basic"],
     },
-    decription: {
+    description: {
       type: String,
       min: 10,
       max: 50,
