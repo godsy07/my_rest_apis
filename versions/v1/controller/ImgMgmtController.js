@@ -86,7 +86,7 @@ const getPaginatedImages = async (req, res) => {
 
 const uploadAPublicImage = async (req, res) => {
   try {
-    const new_file_path = `users/${req.user.id}/images/`;
+    const new_file_path = `public/images/`;
     if (!req.file) {
       return res
         .status(405)
@@ -106,6 +106,7 @@ const uploadAPublicImage = async (req, res) => {
     const validate = schema.validate({ image_title, image_tags, image_description });
     const { error } = validate;
     if (error) {
+      // Delete file from directory
       return res
         .status(400)
         .json({ status: false, message: error.details[0].message });
@@ -121,7 +122,6 @@ const uploadAPublicImage = async (req, res) => {
       decription: image_description,
     });
 
-    console.log("image_data: ", image_data)
     return res
       .status(200)
       .json({
@@ -143,7 +143,7 @@ const uploadAPublicImage = async (req, res) => {
 
 const uploadAPrivateImage = async (req, res) => {
   try {
-    const new_file_path = `users/${req.user.id}/images/private/`;
+    const new_file_path = `users/${req.user.id}/images/`;
     if (!req.file) {
       return res
         .status(405)
@@ -163,6 +163,7 @@ const uploadAPrivateImage = async (req, res) => {
     const validate = schema.validate({ image_title, image_tags, image_description });
     const { error } = validate;
     if (error) {
+      // Delete file from directory
       return res
         .status(400)
         .json({ status: false, message: error.details[0].message });

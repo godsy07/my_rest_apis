@@ -9,7 +9,7 @@ const { fileImageFilter } = require('../../../middleware/uploads');
 // Multer configuration
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-      const fullPath = path.join(__dirname, '..', '..', '..', `uploads/users/${req.user.id}/images/`); // Specify the full path here
+      const fullPath = path.join(__dirname, '..', '..', '..', `uploads/public/images/`); // Specify the full path here
       cb(null, fullPath);
     },
     filename: (req, file, cb) => {
@@ -21,7 +21,7 @@ const storage = multer.diskStorage({
 
 const privateStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-      const fullPath = path.join(__dirname, '..', '..', '..', `uploads/users/${req.user.id}/private/`); // Specify the full path here
+      const fullPath = path.join(__dirname, '..', '..', '..', `uploads/users/${req.user.id}/images/`); // Specify the full path here
       cb(null, fullPath);
     },
     filename: (req, file, cb) => {
