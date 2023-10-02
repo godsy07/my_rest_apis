@@ -1,3 +1,4 @@
+const fs = require('fs');
 const Joi = require("joi");
 const path = require("path");
 
@@ -94,6 +95,7 @@ const uploadAPublicImage = async (req, res) => {
     }
     const file_name = req.file.filename;
     const file_path = new_file_path + file_name;
+    const actualRelativeFilePath = req.file.path;
 
     const { image_title, image_tags, image_description } = req.body;
     // perform the validation in this step
@@ -107,6 +109,7 @@ const uploadAPublicImage = async (req, res) => {
     const { error } = validate;
     if (error) {
       // Delete file from directory
+      fs.unlinkSync(actualRelativeFilePath);
       return res
         .status(400)
         .json({ status: false, message: error.details[0].message });
@@ -151,6 +154,7 @@ const uploadAPrivateImage = async (req, res) => {
     }
     const file_name = req.file.filename;
     const file_path = new_file_path + file_name;
+    const actualRelativeFilePath = req.file.path;
 
     const { image_title, image_tags, image_description } = req.body;
     // perform the validation in this step
@@ -164,6 +168,7 @@ const uploadAPrivateImage = async (req, res) => {
     const { error } = validate;
     if (error) {
       // Delete file from directory
+      fs.unlinkSync(actualRelativeFilePath);
       return res
         .status(400)
         .json({ status: false, message: error.details[0].message });
