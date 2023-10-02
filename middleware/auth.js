@@ -1,7 +1,6 @@
 const jwt = require("jsonwebtoken");
 
 const authenticated = (req, res, next) => {
-  
     let token = req.cookies && req.cookies.my_api_token;
   
     if (token === undefined){

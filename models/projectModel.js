@@ -11,6 +11,11 @@ const ProjectSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    saved_by: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'myapi_user',
+      required: true,
+    },
     active: {
       type: Boolean,
       default: true,
