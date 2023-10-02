@@ -6,4 +6,6 @@ dist/
 public/uploads/
 public/downloads/
 
+uploads/users/
+
 *.env
