@@ -1,28 +1,65 @@
 const fs = require('fs');
+const url = require('url');
 const Joi = require("joi");
-const path = require("path");
+const mongoose = require('mongoose');
 
 const ImageModel = require("../../../models/imageModel");
 
-const getAllImages = async (req, res) => {
+const getPaginatedPublicImages = async (req, res) => {
   try {
-    return res
-      .status(200)
-      .json({ status: true, data: [], message: "Fetched images list." });
-  } catch (e) {
-    return res
-      .status(500)
-      .json({
-        status: false,
-        data: [],
-        message: "Something went wrong in server",
-      });
-  }
-};
+    const query = url.parse(req.url,true).query;
+    const search_term = query.search_term ? query.search_term : "";
+    const page_no = query.page_no ? Number(query.page_no) : 1;
+    const ITEMS_PER_PAGE = query.page_limit ? Number(query.page_limit) : 10;
 
-const getPaginatedImages = async (req, res) => {
+    let sort_data = query.sort_data ? JSON.parse(query.sort_data) : [{ col:"createdAt", value:"desc" }];
+    if (sort_data.length === 0) sort_data = [{ col:"createdAt", value:"desc" }];
+    
+    const sortObject = {};
+    sort_data.forEach((item) => {
+      sortObject[item.col] = item.value === "asc" ? 1 : -1;
+    });
+    
+    const total_items = await recordModel.find().countDocuments();
+    const total_pages = Math.ceil(total_items / ITEMS_PER_PAGE);
+    
+    const recordsPipeline = [
+      {
+        $sort: {
+          createdAt: 1,
+        },
+      },
+      {
+        $sort: sortObject,
+      },
+    ];
+
+
+    if (ITEMS_PER_PAGE > 0) {
+      recordsPipeline.push({
+        $skip: (page_no - 1) * ITEMS_PER_PAGE,
+      });
+      recordsPipeline.push({
+        $limit: ITEMS_PER_PAGE,
+      });
+    } else {
+      recordsPipeline.push({
+        $skip: 0,
+      });
+    }
+
+    const records = await ImageModel.aggregate([...recordsPipeline]);
+
+    return res.status(500).json({ status: false, page_no, total_items, total_pages, data: records, message: 'Fetched image list.' })
+  } catch(e) {
+    return res.status(500).json({ status: false, data: [], message: 'Something went wrong in server' })
+  }
+}
+
+const getPaginatedPrivateImages = async (req, res) => {
   try {
-    const query = url_module.parse(req.url,true).query;
+    const user_id = req.user.id;
+    const query = url.parse(req.url,true).query;
     const search_term = query.search_term ? query.search_term : "";
     const page_no = query.page_no ? Number(query.page_no) : 1;
     const ITEMS_PER_PAGE = query.page_limit ? Number(query.page_limit) : 10;
@@ -36,18 +73,11 @@ const getPaginatedImages = async (req, res) => {
     });
 
     const find_object = {
-      // $or: [
-      //   {  },
-      // ],
+      saved_by:  new mongoose.Types.ObjectId(user_id)
     };
     
-    const total_items = await recordModel.find(find_object).countDocuments();
+    const total_items = await ImageModel.find(find_object).countDocuments();
     const total_pages = Math.ceil(total_items / ITEMS_PER_PAGE);
-
-    // const data = await recordModel.find(find_object)
-    //   .skip((page_no - 1) * ITEMS_PER_PAGE)
-    //   .limit(ITEMS_PER_PAGE)
-    //   .sort(sortObject);
     
     const recordsPipeline = [
       {
@@ -79,8 +109,9 @@ const getPaginatedImages = async (req, res) => {
 
     const records = await ImageModel.aggregate([...recordsPipeline]);
 
-    return res.status(500).json({ status: false, page_no, total_items, total_pages, data: records, message: 'Fetched image list.' })
+    return res.status(200).json({ status: false, page_no, total_items, total_pages, data: records, message: 'Fetched image list.' })
   } catch(e) {
+    console.log(e);
     return res.status(500).json({ status: false, data: [], message: 'Something went wrong in server' })
   }
 }
@@ -133,7 +164,6 @@ const uploadAPublicImage = async (req, res) => {
         message: "Uploaded the image with details.",
       });
   } catch (e) {
-    console.log(e)
     return res
       .status(500)
       .json({
@@ -204,8 +234,8 @@ const uploadAPrivateImage = async (req, res) => {
 };
 
 module.exports = {
-  getAllImages,
-  getPaginatedImages,
+  getPaginatedPublicImages,
+  getPaginatedPrivateImages,
   uploadAPublicImage,
   uploadAPrivateImage,
 };
