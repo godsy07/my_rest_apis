@@ -12,6 +12,9 @@ const logger = require('./middleware/logger');
 
 const userRoutes = require("./versions/v1/routes/userRoutes");
 const projectRoutes = require("./versions/v1/routes/projectRoutes");
+const imgMgmtRoutes = require("./versions/v1/routes/imgMgmtRoutes");
+const { authenticated } = require('./middleware/auth');
+const { checkUserExists } = require('./utils/checkAccess');
 
 const app = express();
 
@@ -35,19 +38,35 @@ app.use(
     })
 );
 app.use(cookieParser());
-app.use(express.static('public'));
 app.use(mongoSanitize({
     replaceWith: '-'
 }));
 
+app.get('/users/:user_id/private/:filename', authenticated, async (req, res) => {
+    const user_id = req.params.user_id;
+    const requestedFile = `/users/${user_id}/private/${req.params.filename}`;
+
+    const user = await checkUserExists(user_id);
+
+    const isAuthenticatedUser = user_id == user._id || user.user_type === 'admin';
+
+    if (isAuthenticatedUser) {
+        res.sendFile(requestedFile);
+    } else {
+        res.status(403).send('Access denied.');
+    }
+});
+
+app.use(express.static('uploads'));
 // Connecting with DB
 mongoDBConnect();
 
 app.use("/my_apis/v1/user", userRoutes);
 app.use("/my_apis/v1/project", projectRoutes);
+app.use("/my_apis/v1/images", imgMgmtRoutes);
 
 app.get("/", async (req, res) => {
-    res.status(200).json({ status: false, message: "Rooutes are working fine." });
+    res.status(200).json({ status: false, message: "Routes are working fine." });
 });
 
 const PORT_NO = process.env.SERVER_PORT ? process.env.SERVER_PORT : 5001;
