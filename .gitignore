@@ -7,5 +7,6 @@ public/uploads/
 public/downloads/
 
 uploads/users/
+uploads/public/
 
 *.env
