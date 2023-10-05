@@ -37,6 +37,7 @@ const getPaginatedImageDetails = async({ find_object, page_no, ITEMS_PER_PAGE, s
     const total_items = await ImageModel.find(find_object).countDocuments();
     const total_pages = Math.ceil(total_items / ITEMS_PER_PAGE);
     
+    domainName = "http://localhost:5001";
     const recordsPipeline = [
       {
         $match: find_object,
@@ -48,6 +49,19 @@ const getPaginatedImageDetails = async({ find_object, page_no, ITEMS_PER_PAGE, s
       },
       {
         $sort: sortObject,
+      },
+      {
+        $project: {
+          _id: 1,
+          saved_by: 1,
+          title: 1,
+          private: 1,
+          tags: 1,
+          description: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          file_path: { $concat: [domainName, '/', '$file_path'] },
+        },
       },
     ];
 

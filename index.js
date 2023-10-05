@@ -69,8 +69,8 @@ app.get("/", async (req, res) => {
     res.status(200).json({ status: false, message: "Routes are working fine." });
 });
 
-const PORT_NO = process.env.SERVER_PORT ? process.env.SERVER_PORT : 5001;
-const HOST = process.env.SERVER_HOST ? process.env.SERVER_HOST : "http://localhost";
+const PORT_NO = process.env.PORT ? process.env.PORT : 5001;
+const HOST = process.env.HOST ? process.env.HOST : "http://localhost";
 
 if (process.env.NODE_ENV === "development") {
     app.listen(PORT_NO, () => {
