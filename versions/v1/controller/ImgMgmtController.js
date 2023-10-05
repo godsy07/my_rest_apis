@@ -7,13 +7,10 @@ const ImageModel = require("../../../models/imageModel");
 
 const getPaginatedImages = async (req, res) => {
   try {
-    const user_id = req.user.id;
     const query = url.parse(req.url,true).query;
     const search_term = query.search_term ? query.search_term : "";
     const page_no = query.page_no ? Number(query.page_no) : 1;
     const ITEMS_PER_PAGE = query.page_limit ? Number(query.page_limit) : 10;
-    const image_type = query.image_type?query.image_type:"public";
-    const user_type = query.user_type?query.user_type:"all";  // single, all
 
     let sort_data = query.sort_data ? JSON.parse(query.sort_data) : [{ col:"createdAt", value:"desc" }];
     if (sort_data.length === 0) sort_data = [{ col:"createdAt", value:"desc" }];
@@ -23,20 +20,21 @@ const getPaginatedImages = async (req, res) => {
       sortObject[item.col] = item.value === "asc" ? 1 : -1;
     });
 
-    const find_object = {};
-    if (user_type === 'single') {
-      find_object.saved_by = new mongoose.Types.ObjectId(user_id);
-      if (image_type == "public") {
-        find_object.file_path = { $regex: `^public/images`, };
-      } else if (image_type == "private") {
-        find_object.private = true;
-        find_object.file_path = { $regex: `^users/${user_id}/images`, };
-      }
-    } else {
-      find_object.file_path = { $regex: `^public/images`, };
+    const find_object = {
+      file_path: { $regex: `^public/images`, }
     }
 
-    const total_items = await recordModel.find(find_object).countDocuments();
+    const { total_items, total_pages, records } = await getPaginatedImageDetails({ find_object, page_no, ITEMS_PER_PAGE, sortObject });
+
+    return res.status(200).json({ status: false, page_no, total_items, total_pages, data: records, message: 'Fetched image list.' })
+  } catch(e) {
+    return res.status(500).json({ status: false, data: [], message: 'Something went wrong in server' })
+  }
+}
+
+const getPaginatedImageDetails = async({ find_object, page_no, ITEMS_PER_PAGE, sortObject }) => {
+  try {
+    const total_items = await ImageModel.find(find_object).countDocuments();
     const total_pages = Math.ceil(total_items / ITEMS_PER_PAGE);
     
     const recordsPipeline = [
@@ -53,7 +51,6 @@ const getPaginatedImages = async (req, res) => {
       },
     ];
 
-
     if (ITEMS_PER_PAGE > 0) {
       recordsPipeline.push({
         $skip: (page_no - 1) * ITEMS_PER_PAGE,
@@ -68,6 +65,41 @@ const getPaginatedImages = async (req, res) => {
     }
 
     const records = await ImageModel.aggregate([...recordsPipeline]);
+
+    return { total_items, total_pages, records };
+  } catch(e) {
+    return false
+  }
+}
+
+const getMyPaginatedImages = async (req, res) => {
+  try {
+    const query = url.parse(req.url,true).query;
+    const search_term = query.search_term ? query.search_term : "";
+    const page_no = query.page_no ? Number(query.page_no) : 1;
+    const ITEMS_PER_PAGE = query.page_limit ? Number(query.page_limit) : 10;
+    const image_type = query.image_type?query.image_type:"public";
+
+    let sort_data = query.sort_data ? JSON.parse(query.sort_data) : [{ col:"createdAt", value:"desc" }];
+    if (sort_data.length === 0) sort_data = [{ col:"createdAt", value:"desc" }];
+    
+    const sortObject = {};
+    sort_data.forEach((item) => {
+      sortObject[item.col] = item.value === "asc" ? 1 : -1;
+    });
+
+    const user_id = req.user.id;
+    const find_object = {
+      saved_by: new mongoose.Types.ObjectId(user_id)
+    };
+    if (image_type == "public") {
+      find_object.file_path = { $regex: `^public/images`, };
+    } else if (image_type == "private") {
+      find_object.private = true;
+      find_object.file_path = { $regex: `^users/${user_id}/images`, };
+    }
+
+    const { total_items, total_pages, records } = await getPaginatedImageDetails({ find_object, page_no, ITEMS_PER_PAGE, sortObject });
 
     return res.status(500).json({ status: false, page_no, total_items, total_pages, data: records, message: 'Fetched image list.' })
   } catch(e) {
@@ -194,6 +226,7 @@ const uploadAPrivateImage = async (req, res) => {
 
 module.exports = {
   getPaginatedImages,
+  getMyPaginatedImages,
   uploadAPublicImage,
   uploadAPrivateImage,
 };
