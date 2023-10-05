@@ -37,7 +37,7 @@ const getPaginatedImageDetails = async({ find_object, page_no, ITEMS_PER_PAGE, s
     const total_items = await ImageModel.find(find_object).countDocuments();
     const total_pages = Math.ceil(total_items / ITEMS_PER_PAGE);
     
-    domainName = "http://localhost:5001";
+    domainName = process.env.SERVER_DOMAIN?process.env.SERVER_DOMAIN:"http://localhost:5001";
     const recordsPipeline = [
       {
         $match: find_object,
