@@ -42,9 +42,9 @@ app.use(mongoSanitize({
     replaceWith: '-'
 }));
 
-app.get('/users/:user_id/private/:filename', authenticated, async (req, res) => {
+app.get('/users/:user_id/private/documents/:filename', authenticated, async (req, res) => {
     const user_id = req.params.user_id;
-    const requestedFile = `/users/${user_id}/private/${req.params.filename}`;
+    const requestedFile = `/users/${user_id}/private/documents/${req.params.filename}`;
 
     const user = await checkUserExists(user_id);
 
