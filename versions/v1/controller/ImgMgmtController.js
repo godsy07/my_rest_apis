@@ -88,11 +88,11 @@ const getPaginatedImageDetails = async({ find_object, page_no, ITEMS_PER_PAGE, s
 
 const getMyPaginatedImages = async (req, res) => {
   try {
-    const query = url.parse(req.url,true).query;
+    const user_id = req.params.user_id;
+    const query = url.parse(req.url, true).query;
     const search_term = query.search_term ? query.search_term : "";
     const page_no = query.page_no ? Number(query.page_no) : 1;
     const ITEMS_PER_PAGE = query.page_limit ? Number(query.page_limit) : 10;
-    const image_type = query.image_type?query.image_type:"public";
 
     let sort_data = query.sort_data ? JSON.parse(query.sort_data) : [{ col:"createdAt", value:"desc" }];
     if (sort_data.length === 0) sort_data = [{ col:"createdAt", value:"desc" }];
@@ -102,16 +102,11 @@ const getMyPaginatedImages = async (req, res) => {
       sortObject[item.col] = item.value === "asc" ? 1 : -1;
     });
 
-    const user_id = req.user.id;
+    // const user_id = req.user.id;
     const find_object = {
-      saved_by: new mongoose.Types.ObjectId(user_id)
+      saved_by: new mongoose.Types.ObjectId(user_id),
+      file_path: { $regex: `^public/images`, },
     };
-    if (image_type == "public") {
-      find_object.file_path = { $regex: `^public/images`, };
-    } else if (image_type == "private") {
-      find_object.private = true;
-      find_object.file_path = { $regex: `^users/${user_id}/images`, };
-    }
 
     const { total_items, total_pages, records } = await getPaginatedImageDetails({ find_object, page_no, ITEMS_PER_PAGE, sortObject });
 

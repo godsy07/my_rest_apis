@@ -16,10 +16,6 @@ const ImageSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    private: {
-      type: Boolean,
-      default: false,
-    },
     tags: {
       type: [{ type: String}],
       default: ["basic"],

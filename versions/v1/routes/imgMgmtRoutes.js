@@ -72,7 +72,7 @@ const uploadSinglePrivateImageMiddleware = (req, res, next) => {
 const router = express.Router();
 
 router.get('/get-paginated-images', ImgMgmtController.getPaginatedImages);
-router.get('/get-my-paginated-images', authenticated, ImgMgmtController.getMyPaginatedImages);
+router.get('/get-my-paginated-images/:user_id', ImgMgmtController.getMyPaginatedImages);
 router.post('/upload-a-public-images', authenticated, uploadSingleImageMiddleware, ImgMgmtController.uploadAPublicImage);
 router.post('/upload-a-private-images', authenticated, uploadSinglePrivateImageMiddleware, ImgMgmtController.uploadAPrivateImage);
 
