@@ -110,7 +110,7 @@ const getMyPaginatedImages = async (req, res) => {
 
     const { total_items, total_pages, records } = await getPaginatedImageDetails({ find_object, page_no, ITEMS_PER_PAGE, sortObject });
 
-    return res.status(500).json({ status: false, page_no, total_items, total_pages, data: records, message: 'Fetched image list.' })
+    return res.status(200).json({ status: false, page_no, total_items, total_pages, data: records, message: 'Fetched image list.' })
   } catch(e) {
     return res.status(500).json({ status: false, data: [], message: 'Something went wrong in server' })
   }
