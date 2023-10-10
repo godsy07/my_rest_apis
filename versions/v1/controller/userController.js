@@ -212,7 +212,7 @@ const getAllUsers = async (req, res) => {
 const getUserDetails = async (req, res) => {
   try {
     const user_id = req.user.id;
-    const user_data = await UserModel.findById(user_id);
+    const user_data = await UserModel.findById(user_id).select("-password");
 
     if (!user_data) {
       return res.status(404).json({ status: false, message: 'User does not exist.' });
@@ -220,7 +220,7 @@ const getUserDetails = async (req, res) => {
 
     return res
       .status(200)
-      .json({ status: true, data: user_data, message: "Fetched users list." });
+      .json({ status: true, data: user_data, message: "Fetched users details." });
   } catch (e) {
     return res
       .status(500)
