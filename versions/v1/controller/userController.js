@@ -209,9 +209,29 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+const getUserDetails = async (req, res) => {
+  try {
+    const user_id = req.user.id;
+    const user_data = await UserModel.findById(user_id);
+
+    if (!user_data) {
+      return res.status(404).json({ status: false, message: 'User does not exist.' });
+    }
+
+    return res
+      .status(200)
+      .json({ status: true, data: user_data, message: "Fetched users list." });
+  } catch (e) {
+    return res
+      .status(500)
+      .json({ status: false, data:[], message: "Something went wrong in server" });
+  }
+};
+
 module.exports = {
   createUser,
   signupUser,
   loginUser,
   getAllUsers,
+  getUserDetails,
 };

@@ -4,7 +4,11 @@ const authenticated = (req, res, next) => {
     let token = req.cookies && req.cookies.my_api_token;
   
     if (token === undefined){
-        token = req.body.headers && req.body.headers.Cookie;
+        token = req.headers && req.headers.Cookie;
+    }
+
+    if (!token && req.headers.authorization) {
+        token = req.headers.authorization.split(" ")[1];
     }
 
     if (!token) {

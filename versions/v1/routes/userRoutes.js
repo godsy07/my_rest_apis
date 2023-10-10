@@ -10,5 +10,6 @@ router.post('/signup-user', UserController.signupUser);
 router.post('/create-user', authenticated, isAdmin, UserController.createUser);
 
 router.get('/get-all-users', authenticated, isAdmin, UserController.getAllUsers);
+router.get('/get-user-details', authenticated, UserController.getUserDetails);
 
 module.exports = router;
