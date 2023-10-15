@@ -49,7 +49,7 @@ UserSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-UserSchema.pre("update", async function (next) {
+UserSchema.pre("updateOne", async function (next) {
   const password = this.getUpdate().password;
   if (!password) {
     return next();
