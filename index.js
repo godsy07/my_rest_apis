@@ -1,20 +1,21 @@
-const express = require('express');
+const http = require('http');
 const cors = require('cors');
-const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
 const cron = require('node-cron');
+const express = require('express');
+const cookieParser = require('cookie-parser');
 const mongoSanitize = require('express-mongo-sanitize');
 
 const mongoDBConnect = require("./config/db");
 dotenv.config({ path: "./.env" });
 
 const logger = require('./middleware/logger');
+const { authenticated } = require('./middleware/auth');
+const { checkUserExists } = require('./utils/checkAccess');
 
 const userRoutes = require("./versions/v1/routes/userRoutes");
 const projectRoutes = require("./versions/v1/routes/projectRoutes");
 const imgMgmtRoutes = require("./versions/v1/routes/imgMgmtRoutes");
-const { authenticated } = require('./middleware/auth');
-const { checkUserExists } = require('./utils/checkAccess');
 
 const app = express();
 
@@ -22,7 +23,7 @@ let corsOptions = {
     origin: true,
     methods: "GET,PUT,POST,OPTIONS",
     credentials: true,
-    preflightContinue: true,
+    preflightContinue: false,
     optionSuccessStatus: 200,
 };
 
@@ -72,8 +73,15 @@ app.get("/", async (req, res) => {
 const PORT_NO = process.env.PORT ? process.env.PORT : 5001;
 const HOST = process.env.HOST ? process.env.HOST : "http://localhost";
 
+const server = http.createServer(app);
+const io = socketIo(server);
+
+io.on('connection', (socket) => {
+// Handle socket connections here
+});
+
 if (process.env.NODE_ENV === "development") {
-    app.listen(PORT_NO, () => {
+    server.listen(PORT_NO, () => {
         console.log(`App running at ${HOST}:${PORT_NO}`);
     });
 }
