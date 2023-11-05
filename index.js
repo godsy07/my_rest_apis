@@ -74,11 +74,6 @@ const PORT_NO = process.env.PORT ? process.env.PORT : 5001;
 const HOST = process.env.HOST ? process.env.HOST : "http://localhost";
 
 const server = http.createServer(app);
-const io = socketIo(server);
-
-io.on('connection', (socket) => {
-// Handle socket connections here
-});
 
 if (process.env.NODE_ENV === "development") {
     server.listen(PORT_NO, () => {
