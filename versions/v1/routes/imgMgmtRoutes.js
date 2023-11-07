@@ -73,6 +73,7 @@ const router = express.Router();
 
 router.get('/get-paginated-images', ImgMgmtController.getPaginatedImages);
 router.get('/get-my-paginated-images/:user_id', ImgMgmtController.getMyPaginatedImages);
+router.get('/delete-image/:image_id', authenticated, ImgMgmtController.deleteImage);
 router.post('/upload-a-public-images', authenticated, uploadSingleImageMiddleware, ImgMgmtController.uploadAPublicImage);
 router.post('/upload-a-private-images', authenticated, uploadSinglePrivateImageMiddleware, ImgMgmtController.uploadAPrivateImage);
 

@@ -1,4 +1,5 @@
 const Joi = require("joi");
+const jwt = require("jsonwebtoken");
 const UserModel = require("../../../models/userModel");
 const { generateToken } = require("../../../middleware/auth");
 
@@ -185,7 +186,6 @@ const updateUser = async (req, res) => {
       .status(200)
       .json({ status: true, user, message: "Updated user details." });
   } catch (e) {
-    console.log(e)
     return res
       .status(500)
       .json({ status: false, message: "Could not update user details." });
@@ -310,6 +310,8 @@ const loginUser = async (req, res) => {
       user_access: user.user_access,
     };
     const token = generateToken(token_payload, remember_me);
+    
+    res.cookie("my_api_token", token);
 
     return res
       .status(200)

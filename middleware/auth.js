@@ -1,26 +1,35 @@
 const jwt = require("jsonwebtoken");
 
 const authenticated = (req, res, next) => {
-    let token = req.cookies && req.cookies.my_api_token;
+    let token;
+    // let token = req.cookies && req.cookies.my_api_token;
   
-    if (token === undefined){
-        token = req.headers && req.headers.Cookie;
+    if (
+        req.headers.authorization &&
+        req.headers.authorization.startsWith("Bearer")
+    ) {
+        token = req.headers.authorization.split(" ")[1];
+    } else if (req.cookies.my_api_token) {
+        token = req.cookies.my_api_token;
     }
 
+    if (!token){
+        token = req.headers && req.headers.Cookie;
+    }
     if (!token && req.headers.authorization) {
         token = req.headers.authorization.split(" ")[1];
     }
 
     if (!token) {
-        return res.status(403).json({ status: false ,message:"A token is required for authentication"});
+        return next(res.status(403).json({ status: false ,message:"A token is required for authentication"}));
     }
     try {
         const decoded = verifyToken(token);
         req.user = decoded;
+        return next();
     } catch (err) {
-        return res.status(401).json({ status: false, message:"Invalid token, Please try logging in again"});
+        return next(res.status(401).json({ status: false, message:"Invalid token, Please try logging in again"}));
     }
-    return next();
 };
 
 
@@ -38,7 +47,7 @@ const verifyToken = (token) => {
 const generateToken = (payload, remember_me) => {
     const expireTime = remember_me ? `${process.env.MY_API_JWT_EXPIRE_DAYS}d` : '1d';
     
-    return jwt.sign(payload, process.env.MY_API_JWT_SECRET_KEY, { expiresIn: expireTime });;
+    return jwt.sign(payload, process.env.MY_API_JWT_SECRET_KEY, { expiresIn: expireTime });
 }
 
 module.exports = {

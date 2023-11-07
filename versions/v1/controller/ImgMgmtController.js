@@ -1,6 +1,7 @@
 const fs = require('fs');
 const url = require('url');
 const Joi = require("joi");
+const path = require('path');
 const mongoose = require('mongoose');
 
 const ImageModel = require("../../../models/imageModel");
@@ -113,6 +114,22 @@ const getMyPaginatedImages = async (req, res) => {
     return res.status(200).json({ status: false, page_no, total_items, total_pages, data: records, message: 'Fetched image list.' })
   } catch(e) {
     return res.status(500).json({ status: false, data: [], message: 'Something went wrong in server' })
+  }
+}
+
+const deleteImage = async (req, res) => {
+  try {
+    const image_id = req.params.image_id;
+
+    const imageData = await ImageModel.findById(image_id);
+    const relativeFilePath = imageData.file_path;
+    const absoluteFilePath = path.resolve(path.join(__dirname, "..", "..","..",'uploads'), relativeFilePath);
+    fs.unlinkSync(absoluteFilePath);
+    await ImageModel.deleteOne({ _id: image_id });
+
+    return res.status(200).json({ status: true, message: 'Image has been deleted.' })
+  } catch(e) {
+    return res.status(500).json({ status: false, message: 'Something went wrong in server' })
   }
 }
 
@@ -235,6 +252,7 @@ const uploadAPrivateImage = async (req, res) => {
 
 module.exports = {
   getPaginatedImages,
+  deleteImage,
   getMyPaginatedImages,
   uploadAPublicImage,
   uploadAPrivateImage,

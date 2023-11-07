@@ -19,18 +19,20 @@ const imgMgmtRoutes = require("./versions/v1/routes/imgMgmtRoutes");
 
 const app = express();
 
-let corsOptions = {
+const corsOptions = {
     origin: true,
-    methods: "GET,PUT,POST,OPTIONS",
+    methods: ["GET", "PUT", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
-    preflightContinue: false,
-    optionSuccessStatus: 200,
+    preflightContinue: true,
+    optionsSuccessStatus: 200,
 };
+const server = http.createServer(app);
 
-app.use(cors(corsOptions));
 if (process.env.NODE_ENV === "development") {
     app.use(logger);
 }
+app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(
@@ -72,8 +74,6 @@ app.get("/", async (req, res) => {
 
 const PORT_NO = process.env.PORT ? process.env.PORT : 5001;
 const HOST = process.env.HOST ? process.env.HOST : "http://localhost";
-
-const server = http.createServer(app);
 
 if (process.env.NODE_ENV === "development") {
     server.listen(PORT_NO, () => {
