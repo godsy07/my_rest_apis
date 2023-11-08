@@ -339,7 +339,7 @@ const getAllUsers = async (req, res) => {
 
 const getUserDetails = async (req, res) => {
   try {
-    const user_id = req.user.id;
+    const user_id = req.params.user_id;
     const user_data = await UserModel.findById(user_id).select("-password");
 
     if (!user_data) {

@@ -11,6 +11,6 @@ router.post('/create-user', authenticated, isAdmin, UserController.createUser);
 router.post('/update-user', authenticated, isAdmin, UserController.updateUser);
 
 router.get('/get-all-users', authenticated, isAdmin, UserController.getAllUsers);
-router.get('/get-user-details', authenticated, UserController.getUserDetails);
+router.get('/get-user-details/:user_id', authenticated, UserController.getUserDetails);
 
 module.exports = router;
