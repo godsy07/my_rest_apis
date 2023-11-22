@@ -58,6 +58,22 @@ const uploadSingleImageMiddleware = (req, res, next) => {
     });
 };
 
+const uploadSingleImageNotMandatoryMiddleware = (req, res, next) => {
+    uploadImage.single('image')(req, res, (err) => {
+        // Check if no file was uploaded
+        if (!req.file) {
+            return next();
+        }
+
+        if (err instanceof multer.MulterError) {
+            return res.status(400).json({ error: err.message });
+        } else if (err) {
+            return res.status(500).json(err);
+        }
+        next();
+    });
+};
+
 const uploadSinglePrivateImageMiddleware = (req, res, next) => {
     uploadPrivateImage.single('image')(req, res, (err) => {
         if (err instanceof multer.MulterError) {
@@ -73,8 +89,10 @@ const router = express.Router();
 
 router.get('/get-paginated-images', ImgMgmtController.getPaginatedImages);
 router.get('/get-my-paginated-images/:user_id', ImgMgmtController.getMyPaginatedImages);
+router.get('/get-image-details/:image_id', authenticated, ImgMgmtController.getUserImageDetails);
 router.get('/delete-image/:image_id', authenticated, ImgMgmtController.deleteImage);
 router.post('/upload-a-public-images', authenticated, uploadSingleImageMiddleware, ImgMgmtController.uploadAPublicImage);
+router.post('/update-image-details', authenticated, uploadSingleImageNotMandatoryMiddleware, ImgMgmtController.updateImageDetails);
 router.post('/upload-a-private-images', authenticated, uploadSinglePrivateImageMiddleware, ImgMgmtController.uploadAPrivateImage);
 
 module.exports = router;

@@ -4,6 +4,7 @@ const Joi = require("joi");
 const path = require('path');
 const mongoose = require('mongoose');
 
+const UserModel = require('../../../models/userModel');
 const ImageModel = require("../../../models/imageModel");
 
 const getPaginatedImages = async (req, res) => {
@@ -117,6 +118,21 @@ const getMyPaginatedImages = async (req, res) => {
   }
 }
 
+const getUserImageDetails = async (req, res) => {
+  try {
+    const image_id = req.params.image_id;
+
+    const imageData = await ImageModel.findById(image_id);
+    if (!imageData) {
+      return res.status(400).json({ status: false, message: 'Could not find image details.' });
+    }
+
+    return res.status(200).json({ status: true, imageData, message: 'Image details have been fetched.' })
+  } catch(e) {
+    return res.status(500).json({ status: false, data: [], message: 'Something went wrong in server' })
+  }
+}
+
 const deleteImage = async (req, res) => {
   try {
     const image_id = req.params.image_id;
@@ -191,6 +207,60 @@ const uploadAPublicImage = async (req, res) => {
   }
 };
 
+const updateImageDetails = async (req, res) => {
+  try {
+    const new_file_path = `public/images/`;
+    let file_path;
+    if (req.file) {
+      const file_name = req.file.filename;
+      file_path = new_file_path + file_name;
+      const actualRelativeFilePath = req.file.path;
+    }
+
+    const { image_id, image_title, image_tags, image_description } = req.body;
+    // perform the validation in this step
+    const schema = Joi.object({
+      image_id: Joi.string().required().label("Image ID"),
+      image_title: Joi.string().min(3).max(100).required().label("Title"),
+      image_tags: Joi.array().items(Joi.string().required()).min(1).label("Tags"),
+      image_description: Joi.string().min(10).max(500).required().label("Description"),
+    });
+    // Validation of details recieved starts here
+    const validate = schema.validate({ image_id, image_title, image_tags, image_description });
+    const { error } = validate;
+    if (error) {
+      if (file_path) {
+        // Delete file from directory
+        fs.unlinkSync(actualRelativeFilePath);
+      }
+      return res
+        .status(400)
+        .json({ status: false, message: error.details[0].message });
+    }
+
+    let image_data = await ImageModel.findById(image_id);
+    if (!image_data) {
+      return res.status(400).json({ status: false, message: 'Could not find image details' });
+    }
+    
+    let updateObject = {
+      saved_by: req.user.id,
+      title: image_title,
+      tags: image_tags,
+      description: image_description,
+    }
+    if (file_path) {
+      updateObject = { ...updateObject, file_path };
+    }
+
+    image_data = await ImageModel.updateOne({ _id: image_id },updateObject);
+
+    return res.status(200).json({ status: true, message: "Image details have been updated." });
+  } catch(e) {
+    return res.status(500).json({ status: false, message: "Something went wrong in server." });
+  }
+}
+
 const uploadAPrivateImage = async (req, res) => {
   try {
     const new_file_path = `users/${req.user.id}/images/`;
@@ -254,6 +324,8 @@ module.exports = {
   getPaginatedImages,
   deleteImage,
   getMyPaginatedImages,
+  getUserImageDetails,
   uploadAPublicImage,
+  updateImageDetails,
   uploadAPrivateImage,
 };
