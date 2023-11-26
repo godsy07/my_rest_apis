@@ -78,5 +78,5 @@ const HOST = process.env.HOST ? process.env.HOST : "http://localhost";
 if (process.env.NODE_ENV === "development") {
     server.listen(PORT_NO, () => {
         console.log(`App running at ${HOST}:${PORT_NO}`);
-    });
+    })
 }
