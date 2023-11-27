@@ -23,7 +23,8 @@ const getPaginatedImages = async (req, res) => {
     });
 
     const find_object = {
-      file_path: { $regex: `^public/images`, }
+      file_path: { $regex: `^public/images` },
+      status: 'approved',
     }
 
     const { total_items, total_pages, records } = await getPaginatedImageDetails({ find_object, page_no, ITEMS_PER_PAGE, sortObject });

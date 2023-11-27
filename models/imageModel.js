@@ -26,6 +26,10 @@ const ImageSchema = new mongoose.Schema(
       max: 50,
       required: true,
     },
+    status: {
+      type: String,
+      default: 'pending', // pending, approved, rejected
+    }
   },
   { timestamps: true }
 );
