@@ -321,6 +321,47 @@ const uploadAPrivateImage = async (req, res) => {
   }
 };
 
+const updateUploadedImageStatus = async (req, res) => {
+  try {
+    const { image_id, status } = req.body;
+    // perform the validation in this step
+    const schema = Joi.object({
+      image_id: Joi.string().required().label("Image ID"),
+      status: Joi.string().valid('approved','rejected').required().label("Image Status"),
+    });
+    // Validation of details recieved starts here
+    const validate = schema.validate({ image_id, status });
+    const { error } = validate;
+    if (error) {
+      return res
+        .status(400)
+        .json({ status: false, message: error.details[0].message });
+    }
+
+    let imageData = await ImageModel.findById(image_id);
+    if (!imageData) {
+      return res.status(400).json({ status: false, message: 'Image does not exists.' });
+    }
+
+    await ImageModel.updateOne({ _id: image_id }, { status });
+
+    return res
+      .status(200)
+      .json({
+        status: true,
+        message: "Status of the image has been updated.",
+      });
+  } catch (e) {
+    return res
+      .status(500)
+      .json({
+        status: false,
+        data: [],
+        message: "Something went wrong in server",
+      });
+  }
+};
+
 module.exports = {
   getPaginatedImages,
   deleteImage,
@@ -329,4 +370,5 @@ module.exports = {
   uploadAPublicImage,
   updateImageDetails,
   uploadAPrivateImage,
+  updateUploadedImageStatus,
 };

@@ -94,5 +94,6 @@ router.get('/delete-image/:image_id', authenticated, ImgMgmtController.deleteIma
 router.post('/upload-a-public-images', authenticated, uploadSingleImageMiddleware, ImgMgmtController.uploadAPublicImage);
 router.post('/update-image-details', authenticated, uploadSingleImageNotMandatoryMiddleware, ImgMgmtController.updateImageDetails);
 router.post('/upload-a-private-images', authenticated, uploadSinglePrivateImageMiddleware, ImgMgmtController.uploadAPrivateImage);
+router.post('/change-image-status', authenticated, isAdmin, ImgMgmtController.updateUploadedImageStatus);
 
 module.exports = router;
