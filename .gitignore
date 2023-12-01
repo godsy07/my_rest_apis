@@ -9,4 +9,4 @@ public/downloads/
 uploads/users/
 uploads/public/
 
-*.env
+.env
