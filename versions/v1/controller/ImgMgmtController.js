@@ -12,6 +12,7 @@ const getPaginatedImages = async (req, res) => {
     const query = url.parse(req.url,true).query;
     const search_term = query.search_term ? query.search_term : "";
     const page_no = query.page_no ? Number(query.page_no) : 1;
+    const image_status = query.image_status;
     const ITEMS_PER_PAGE = query.page_limit ? Number(query.page_limit) : 10;
 
     let sort_data = query.sort_data ? JSON.parse(query.sort_data) : [{ col:"createdAt", value:"desc" }];
@@ -24,7 +25,11 @@ const getPaginatedImages = async (req, res) => {
 
     const find_object = {
       file_path: { $regex: `^public/images` },
-      status: 'approved',
+    }
+    if (image_status) {
+      find_object.status = image_status;
+    } else {
+      find_object.status = 'approved';
     }
 
     const { total_items, total_pages, records } = await getPaginatedImageDetails({ find_object, page_no, ITEMS_PER_PAGE, sortObject });
@@ -58,6 +63,7 @@ const getPaginatedImageDetails = async({ find_object, page_no, ITEMS_PER_PAGE, s
           _id: 1,
           saved_by: 1,
           title: 1,
+          status: 1,
           private: 1,
           tags: 1,
           description: 1,
