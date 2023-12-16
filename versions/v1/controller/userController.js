@@ -341,7 +341,7 @@ const getUserDetails = async (req, res) => {
   try {
     const user_id = req.params.user_id;
     const user_data = await UserModel.findById(user_id).select("-password");
-
+    
     if (!user_data) {
       return res.status(404).json({ status: false, message: 'User does not exist.' });
     }
