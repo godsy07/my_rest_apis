@@ -4,31 +4,30 @@ const ReactionSchema = new mongoose.Schema(
   {
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'myapi_user',
+      ref: "myapi_user",
       required: true,
     },
     image_id: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'myapi_image',
+      ref: "myapi_image",
       required: true,
     },
     type: {
-        type: String,   // like, comment, report
-        required: true,
+      type: String, // like, comment, report
+      required: true,
     },
     status: {
-        type: String,
-        default: 'active', // active, flagged
-    }
+      type: String,
+      default: "active", // active, inactive, flagged
+    },
     content: {
       type: String,
       max: 500,
-      default: '',
+      default: "",
     },
   },
   { timestamps: true }
 );
-
 
 const ReactionModel = mongoose.model("myapi_reaction", ReactionSchema);
 
