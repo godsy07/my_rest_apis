@@ -8,6 +8,7 @@ const UserModel = require("../../../models/userModel");
 const ImageModel = require("../../../models/imageModel");
 const { getImageStats } = require("../../../utils/utilFunctions");
 const ReactionModel = require("../../../models/reactionModel");
+const { getToken, verifyToken } = require("../../../middleware/auth");
 
 const getPaginatedImages = async (req, res) => {
   try {
@@ -45,24 +46,20 @@ const getPaginatedImages = async (req, res) => {
         sortObject,
       });
 
-    return res
-      .status(200)
-      .json({
-        status: false,
-        page_no,
-        total_items,
-        total_pages,
-        data: records,
-        message: "Fetched image list.",
-      });
+    return res.status(200).json({
+      status: false,
+      page_no,
+      total_items,
+      total_pages,
+      data: records,
+      message: "Fetched image list.",
+    });
   } catch (e) {
-    return res
-      .status(500)
-      .json({
-        status: false,
-        data: [],
-        message: "Something went wrong in server",
-      });
+    return res.status(500).json({
+      status: false,
+      data: [],
+      message: "Something went wrong in server",
+    });
   }
 };
 
@@ -161,24 +158,20 @@ const getMyPaginatedImages = async (req, res) => {
         sortObject,
       });
 
-    return res
-      .status(200)
-      .json({
-        status: false,
-        page_no,
-        total_items,
-        total_pages,
-        data: records,
-        message: "Fetched image list.",
-      });
+    return res.status(200).json({
+      status: false,
+      page_no,
+      total_items,
+      total_pages,
+      data: records,
+      message: "Fetched image list.",
+    });
   } catch (e) {
-    return res
-      .status(500)
-      .json({
-        status: false,
-        data: [],
-        message: "Something went wrong in server",
-      });
+    return res.status(500).json({
+      status: false,
+      data: [],
+      message: "Something went wrong in server",
+    });
   }
 };
 
@@ -193,33 +186,22 @@ const getUserImageDetails = async (req, res) => {
         .json({ status: false, message: "Could not find image details." });
     }
 
-    imageData = { ...imageData, file_path: `${process.env.SERVER_DOMAIN}/${imageData.file_path}` };
+    imageData = {
+      ...imageData,
+      file_path: `${process.env.SERVER_DOMAIN}/${imageData.file_path}`,
+    };
 
-    const liked = await ReactionModel.findOne({
-      type: "like",
-      status: "active",
+    return res.status(200).json({
+      status: true,
+      imageData,
+      message: "Image details have been fetched.",
     });
-    if (liked) {
-      imageData = { ...imageData, liked: true };
-    } else {
-      imageData = { ...imageData, liked: false };
-    }
-
-    return res
-      .status(200)
-      .json({
-        status: true,
-        imageData,
-        message: "Image details have been fetched.",
-      });
   } catch (e) {
-    return res
-      .status(500)
-      .json({
-        status: false,
-        data: [],
-        message: "Something went wrong in server",
-      });
+    return res.status(500).json({
+      status: false,
+      data: [],
+      message: "Something went wrong in server",
+    });
   }
 };
 
@@ -241,20 +223,16 @@ const getUserImageStats = async (req, res) => {
         .json({ status: false, message: "Could not find image statistics." });
     }
 
-    return res
-      .status(200)
-      .json({
-        status: true,
-        stats: result,
-        message: "Image statistics have been fetched.",
-      });
+    return res.status(200).json({
+      status: true,
+      stats: result,
+      message: "Image statistics have been fetched.",
+    });
   } catch (e) {
-    return res
-      .status(500)
-      .json({
-        status: false,
-        message: "Something went wrong in server",
-      });
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong in server",
+    });
   }
 };
 
@@ -269,30 +247,22 @@ const getUserImageReactions = async (req, res) => {
         .json({ status: false, message: "Could not find image details." });
     }
 
-    const stats = await getImageStats(image_id);
-    if (stats.error) {
-      return res
-        .status(500)
-        .json({ status: false, message: "Could not find image statistics." });
-    }
+    const comments = await ReactionModel.find({
+      image_id,
+      type: "comment",
+      status: "active",
+    }).populate("user_id").lean();
 
-    const comments = await ReactionModel.find({ image_id, type: 'comment', status: 'active' }).lean();
-
-    return res
-      .status(200)
-      .json({
-        status: true,
-        stats,
-        comments,
-        message: "Image reactions have been fetched.",
-      });
+    return res.status(200).json({
+      status: true,
+      comments,
+      message: "Image reactions have been fetched.",
+    });
   } catch (e) {
-    return res
-      .status(500)
-      .json({
-        status: false,
-        message: "Something went wrong in server",
-      });
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong in server",
+    });
   }
 };
 
@@ -326,30 +296,45 @@ const toggleImageLikeStatus = async (req, res) => {
 
     const image = await ImageModel.findById(image_id);
     if (!image) {
-      return res.status(400).json({ status: false, message: "Image does not exist." });
+      return res
+        .status(400)
+        .json({ status: false, message: "Image does not exist." });
     }
 
-    let message = '';
-    let liked = await ReactionModel.findOne({ image_id, user_id: authUser.id, type: 'like' });
+    let message = "";
+    let liked = await ReactionModel.findOne({
+      image_id,
+      user_id: authUser.id,
+      type: "like",
+    });
     if (liked) {
       if (liked.status === "active") {
         // already liked, so unlike now
-        await ReactionModel.updateOne({ image_id, user_id: authUser.id, type: 'like' },{ $set: {status: 'inactive'} });
-        message = 'Image has been unliked.'
+        await ReactionModel.updateOne(
+          { image_id, user_id: authUser.id, type: "like" },
+          { $set: { status: "inactive" } }
+        );
+        message = "Image has been unliked.";
       } else {
         // like the image
-        await ReactionModel.updateOne({ image_id, user_id: authUser.id, type: 'like' },{ $set: {status: 'active'} });
-        message = 'Image has been liked.'
+        await ReactionModel.updateOne(
+          { image_id, user_id: authUser.id, type: "like" },
+          { $set: { status: "active" } }
+        );
+        message = "Image has been liked.";
       }
     } else {
       // like image
-      await ReactionModel.create({ image_id, user_id: authUser.id, type: 'like', status: 'active' });
-      message = 'Image has been liked.'
+      await ReactionModel.create({
+        image_id,
+        user_id: authUser.id,
+        type: "like",
+        status: "active",
+      });
+      message = "Image has been liked.";
     }
 
-    return res
-      .status(200)
-      .json({ status: true, message });
+    return res.status(200).json({ status: true, message });
   } catch (e) {
     return res
       .status(500)
@@ -560,6 +545,58 @@ const uploadAPrivateImage = async (req, res) => {
   }
 };
 
+const commentOnImage = async (req, res) => {
+  try {
+    const { image_id, comment } = req.body;
+    // perform the validation in this step
+    const schema = Joi.object({
+      image_id: Joi.string().required().label("Image ID"),
+      comment: Joi.string().max(400).required().label("Comment"),
+    });
+    // Validation of details recieved starts here
+    const validate = schema.validate({ image_id, comment });
+    const { error } = validate;
+    if (error) {
+      return res
+        .status(400)
+        .json({ status: false, message: error.details[0].message });
+    }
+
+    const authUser = req.user;
+    let user = await UserModel.findById(authUser.id);
+    if (!user) {
+      return res
+        .status(400)
+        .json({ status: false, message: "User does not exist." });
+    }
+
+    let imageData = await ImageModel.findById(image_id);
+    if (!imageData) {
+      return res
+        .status(400)
+        .json({ status: false, message: "Image does not exists." });
+    }
+
+    await ReactionModel.create({
+      user_id: authUser.id,
+      image_id,
+      type: "comment",
+      status: "active",
+      content: comment,
+    });
+
+    return res.status(200).json({
+      status: true,
+      message: "Successfully commented on image.",
+    });
+  } catch (e) {
+    return res.status(500).json({
+      status: false,
+      message: "Something went wrong in server",
+    });
+  }
+};
+
 const updateUploadedImageStatus = async (req, res) => {
   try {
     const { image_id, status } = req.body;
@@ -613,5 +650,6 @@ module.exports = {
   uploadAPublicImage,
   updateImageDetails,
   uploadAPrivateImage,
+  commentOnImage,
   updateUploadedImageStatus,
 };

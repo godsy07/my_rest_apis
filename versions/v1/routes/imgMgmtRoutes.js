@@ -89,7 +89,7 @@ const router = express.Router();
 
 router.get('/get-paginated-images', ImgMgmtController.getPaginatedImages);
 router.get('/get-my-paginated-images/:user_id', ImgMgmtController.getMyPaginatedImages);
-router.get('/get-image-details/:image_id', authenticated, ImgMgmtController.getUserImageDetails);
+router.get('/get-image-details/:image_id', ImgMgmtController.getUserImageDetails);
 router.get('/get-image-stats/:image_id', ImgMgmtController.getUserImageStats);
 router.get('/get-image-reactions/:image_id', ImgMgmtController.getUserImageReactions);
 router.get('/delete-image/:image_id', authenticated, ImgMgmtController.deleteImage);
@@ -98,5 +98,6 @@ router.post('/upload-a-public-images', authenticated, uploadSingleImageMiddlewar
 router.post('/update-image-details', authenticated, uploadSingleImageNotMandatoryMiddleware, ImgMgmtController.updateImageDetails);
 router.post('/upload-a-private-images', authenticated, uploadSinglePrivateImageMiddleware, ImgMgmtController.uploadAPrivateImage);
 router.post('/change-image-status', authenticated, isAdmin, ImgMgmtController.updateUploadedImageStatus);
+router.post('/comment-on-image', authenticated, ImgMgmtController.commentOnImage);
 
 module.exports = router;

@@ -1,9 +1,23 @@
 const jwt = require("jsonwebtoken");
 
-const authenticated = (req, res, next) => {
+const authenticated = (req, res, next) => {  
+    const token = getToken(req);
+
+    if (!token) {
+        return next(res.status(403).json({ status: false ,message:"A token is required for authentication"}));
+    }
+    try {
+        const decoded = verifyToken(token);
+        req.user = decoded;
+        return next();
+    } catch (err) {
+        return next(res.status(401).json({ status: false, message:"Invalid token, Please try logging in again"}));
+    }
+};
+
+
+const getToken = (req) => {
     let token;
-    // let token = req.cookies && req.cookies.my_api_token;
-  
     if (
         req.headers.authorization &&
         req.headers.authorization.startsWith("Bearer")
@@ -20,18 +34,8 @@ const authenticated = (req, res, next) => {
         token = req.headers.authorization.split(" ")[1];
     }
 
-    if (!token) {
-        return next(res.status(403).json({ status: false ,message:"A token is required for authentication"}));
-    }
-    try {
-        const decoded = verifyToken(token);
-        req.user = decoded;
-        return next();
-    } catch (err) {
-        return next(res.status(401).json({ status: false, message:"Invalid token, Please try logging in again"}));
-    }
-};
-
+    return token;
+}
 
 const isAdmin = (req, res, next) => {
     if (req.user.user_type !== "admin") {
@@ -52,6 +56,7 @@ const generateToken = (payload, remember_me) => {
 
 module.exports = {
     authenticated,
+    getToken,
     isAdmin,
     verifyToken,
     generateToken,
